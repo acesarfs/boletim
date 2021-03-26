@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * Contains boletim.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function boletim_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the boletim module.
+    case 'help.page.boletim':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Boletim') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function boletim_theme() {
+  return [
+
+    'boletim' => [
+      'template' => 'boletim',
+      'variables' => [
+        'content' => NULL,
+      ],
+    ],
+
+  ];
+}

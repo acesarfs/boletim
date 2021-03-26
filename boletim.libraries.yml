@@ -1,0 +1,11 @@
+
+boletim:
+  css:
+    theme:
+      css/boletim.css: {}
+  js:
+    js/boletim.js: {}
+  dependencies:
+    - core/jquery
+    # - core/jquery.ui.sortable
+    - jquery_ui_sortable/sortable

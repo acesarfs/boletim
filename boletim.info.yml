@@ -1,0 +1,7 @@
+name: 'boletim'
+type: module
+description: 'Boletim'
+core: 8.x
+package: 'Custom'
+dependencies:
+  - jquery_ui_sortable

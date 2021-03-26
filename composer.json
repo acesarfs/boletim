@@ -1,0 +1,11 @@
+{
+    "name": "fflch/boletim",
+    "type": "drupal-module",
+    "authors": [
+        {
+            "name": "Thiago Gomes Verissimo",
+            "email": "verissimotgv@gmail.com"
+        }
+    ],
+    "require": {}
+}
