@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Drupal\boletim\Form;
 
@@ -24,52 +24,77 @@ class BoletimForm extends ConfigFormBase {
     $nids = \Drupal::entityQuery('node')->condition('type','page')->execute();
     $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
 
-    $titles = [];
+    $options = [];
     foreach ($nodes as $node) {
-      $node = \Drupal::entityTypeManager()->getStorage('node')->load($node->nid->value);
-      $titles[$node->nid->value] =  $node->title->value ;
+      #$node = \Drupal::entityTypeManager()->getStorage('node')->load($node->nid->value);
+      #$titles[$node->nid->value] =  $node->title->value ;
+      $options[$node->nid->value] =  array('title' => $node->title->value);
     }
 
-    $form['um_texto_qualquer'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Digite um texto qualquer'),
-      '#default_value' => $config->get('um_texto_qualquer'),
-    ];
-
-    $form['nodes'] = array(
-      '#type' => 'checkboxes',
-      '#options' => $titles,
-      '#title' => $this->t('What standardized tests did you take?'),
+    $form['table'] = array(
+      '#type' => 'tableselect',
+      '#header' => array('title' => t('Título')),
+      '#options' => $options,
+      '#empty' => t('Nenhum conteúdo encontrado!'),
+      '#attributes' => array('id' => 'sortable'),
     );
 
+#    $options = array();
+#    foreach ($titles as $key=>$title) {
+#      $options[$key] = array(
+#        'title' => $title,
+#      );
+#    }
 
-      $form['noticias'] = array(
-        '#type' => 'empty_value',
-        '#prefix' => '<ul id="sortable">',
-        '#suffix' => '</ul>'
-      );
-
-    foreach ($titles as $key => $title) {
-      $form['noticias'][] = [
-          '#theme' => 'input__checkbox',
-          '#prefix' => '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>',
-          '#suffix' => '</li>',
-          #'#data-drupal-selector' => 'noticias',
-          '#attributes' => [
-            // You can change name attribute.
-            'name' => 'noticias['.$key.']',
-            'value' => $key,
-            // 'class' => 'filter',
-            'type' => 'checkbox',
-
-          ],
-          '#children' => [
-            '#type' => 'label',
-            '#title' => $title,
-            '#title_display' => 'after',
-          ]
-        ];
-      }
+#    $form['um_texto_qualquer'] = [
+#      '#type' => 'textfield',
+#      '#title' => $this->t('Digite um texto qualquer'),
+#      '#default_value' => $config->get('um_texto_qualquer'),
+#    ];
+#
+#    $form['nodes'] = array(
+#      '#type' => 'checkboxes',
+#      '#options' => $titles,
+#      '#title' => $this->t('What standardized tests did you take?'),
+#      '#attributes' => [
+#          'class' => ['ui-state-default'],
+#      ]
+#      #$form['#attributes']['class'][] = 'mu-subscription-form';
+#      # array('attributes' => array('class' => array('ui-state-default'))))
+#    );
+#
+#
+#      $form['noticias'] = array(
+#        '#type' => 'empty_value',
+#        '#prefix' => '<ul id="sortable">',
+#        '#suffix' => '</ul>'
+#      );
+#
+#      $form['nides'] = array(
+#        '#type' => 'hidden',
+#      );
+#
+#    foreach ($titles as $key => $title) {
+#      $form['noticias'][] = [
+#          '#theme' => 'input__checkbox',
+#          '#prefix' => '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>',
+#          '#suffix' => '</li>',
+#          #'#data-drupal-selector' => 'noticias',
+#          '#attributes' => [
+#            // You can change name attribute.
+#            'name' => 'noticias['.$key.']',
+#            'value' => $key,
+#            // 'class' => 'filter',
+#            'type' => 'checkbox',
+#
+#          ],
+#          '#children' => [
+#            '#type' => 'label',
+#            '#title' => $title,
+#            '#title_display' => 'after',
+#          ]
+#        ];
+#      }
 /*
       foreach ($titles as $key => $title) {
       $form['noticias'][] = [
@@ -100,14 +125,18 @@ class BoletimForm extends ConfigFormBase {
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    dsm($form_state->getValue('nodes'));
+    $results = array_filter($form_state->getValue('table'));
+    dd($results);
+
+    #dd($form_state->getValue('nides'));
+    #dd($form_state->getValue('nodes'));
     #foreach($form_state->getValue('noticias') as $k=>$v){
     #  dsm($k .'  ' . $v );
     #}
-    dsm($form_state->getValues());
+    #dd($form_state->getValues());
 
 
-    $form_state->getValue('noticias');
+    #dd($form_state->getValue('noticias'));
 
     /*$this->config('boletim.settings')
       ->set('um_texto_qualquer', $form_state->getValue('um_texto_qualquer'))

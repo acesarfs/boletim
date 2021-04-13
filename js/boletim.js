@@ -1,8 +1,14 @@
 (function($){
     $( document ).ready(function() {
-        console.log('Oi ######');
-        $( '#sortable' ).sortable();
+        /*$( '#sortable' ).sortable();
         $( '#sortable' ).disableSelection();
+        $( "#sortable" ).on( "sortchange", function( event, ui ) {
+            console.log('Mudança');
+            $("input[name*='nides']").val('2,3');
+        } );
+*/
+        $( '#sortable tbody' ).sortable();
+        $( '#sortable tbody' ).disableSelection();
     });
 })(jQuery);
 
