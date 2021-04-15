@@ -4,6 +4,9 @@ namespace Drupal\boletim\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\node\Entity\Node;
 
 class BoletimForm extends ConfigFormBase {
 
@@ -26,8 +29,6 @@ class BoletimForm extends ConfigFormBase {
 
     $options = [];
     foreach ($nodes as $node) {
-      #$node = \Drupal::entityTypeManager()->getStorage('node')->load($node->nid->value);
-      #$titles[$node->nid->value] =  $node->title->value ;
       $options[$node->nid->value] =  array('title' => $node->title->value);
     }
 
@@ -39,80 +40,6 @@ class BoletimForm extends ConfigFormBase {
       '#attributes' => array('id' => 'sortable'),
     );
 
-#    $options = array();
-#    foreach ($titles as $key=>$title) {
-#      $options[$key] = array(
-#        'title' => $title,
-#      );
-#    }
-
-#    $form['um_texto_qualquer'] = [
-#      '#type' => 'textfield',
-#      '#title' => $this->t('Digite um texto qualquer'),
-#      '#default_value' => $config->get('um_texto_qualquer'),
-#    ];
-#
-#    $form['nodes'] = array(
-#      '#type' => 'checkboxes',
-#      '#options' => $titles,
-#      '#title' => $this->t('What standardized tests did you take?'),
-#      '#attributes' => [
-#          'class' => ['ui-state-default'],
-#      ]
-#      #$form['#attributes']['class'][] = 'mu-subscription-form';
-#      # array('attributes' => array('class' => array('ui-state-default'))))
-#    );
-#
-#
-#      $form['noticias'] = array(
-#        '#type' => 'empty_value',
-#        '#prefix' => '<ul id="sortable">',
-#        '#suffix' => '</ul>'
-#      );
-#
-#      $form['nides'] = array(
-#        '#type' => 'hidden',
-#      );
-#
-#    foreach ($titles as $key => $title) {
-#      $form['noticias'][] = [
-#          '#theme' => 'input__checkbox',
-#          '#prefix' => '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>',
-#          '#suffix' => '</li>',
-#          #'#data-drupal-selector' => 'noticias',
-#          '#attributes' => [
-#            // You can change name attribute.
-#            'name' => 'noticias['.$key.']',
-#            'value' => $key,
-#            // 'class' => 'filter',
-#            'type' => 'checkbox',
-#
-#          ],
-#          '#children' => [
-#            '#type' => 'label',
-#            '#title' => $title,
-#            '#title_display' => 'after',
-#          ]
-#        ];
-#      }
-/*
-      foreach ($titles as $key => $title) {
-      $form['noticias'][] = [
-          '#type' => 'checkbox',
-          '#prefix' => '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>',
-          '#suffix' => '</li>',
-          '#title'   => $title,
-          '#title_display' => 'after',
-          '#attributes' => [
-            // You can change name attribute.
-            'name' => 'noticias['.$key.']',
-            #'value' => $key,
-            #'value' => 0,
-            // 'class' => 'filter',
-          ],
-        ];
-      }
-*/
     return parent::buildForm($form, $form_state);
   }
 
@@ -126,7 +53,28 @@ class BoletimForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     $results = array_filter($form_state->getValue('table'));
-    dd($results);
+
+    $body = '';
+    $nodes = Node::loadMultiple(array_keys($results));
+    foreach ($nodes as $node) {
+      $body .= "<h1>{$node->title->value}</h1> <br><br>";
+    }
+
+    $values = [
+      'type' => 'page',
+      'title' => 'Teste',
+      'moderation_state' => 'published',
+      'langcode' => 'pt-br',
+      'body' => [['value' => $body, 'format' => 'full_html']],
+      'uid' => \Drupal::currentUser()->id(),
+    ];
+
+    $node = \Drupal::service('entity_type.manager')->getStorage('node')->create($values);
+    $node->save();
+
+    $url = Url::fromRoute('entity.node.edit_form', ['node' => $node->nid->value])->toString();
+    $response = new RedirectResponse($url);
+    $response->send();
 
     #dd($form_state->getValue('nides'));
     #dd($form_state->getValue('nodes'));
