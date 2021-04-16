@@ -1,0 +1,5 @@
+boletim.tab:
+  route_name: boletim.boletim_send_mail
+  title: 'Enviar como Newsletter'
+  base_route: entity.node.canonical
+  weight: 1000

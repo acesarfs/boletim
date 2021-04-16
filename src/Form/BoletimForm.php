@@ -2,22 +2,16 @@
 
 namespace Drupal\boletim\Form;
 
-use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\node\Entity\Node;
 
-class BoletimForm extends ConfigFormBase {
+class BoletimForm extends FormBase {
 
   public function getFormId() {
     return 'boletim_form';
-  }
-
-  protected function getEditableConfigNames() {
-    return [
-      'boletim.settings',
-    ];
   }
 
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -32,6 +26,11 @@ class BoletimForm extends ConfigFormBase {
       $options[$node->nid->value] =  array('title' => $node->title->value);
     }
 
+    $form['numero'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Bla'),
+    );
+
     $form['table'] = array(
       '#type' => 'tableselect',
       '#header' => array('title' => t('Título')),
@@ -39,29 +38,36 @@ class BoletimForm extends ConfigFormBase {
       '#empty' => t('Nenhum conteúdo encontrado!'),
       '#attributes' => array('id' => 'sortable'),
     );
+    
+    $form['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('CRIOAR'),
+    ];
 
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   public function validateForm(array &$form, FormStateInterface $form_state) {
+
     /*$x = $form_state->getValue('um_texto_qualquer');
     if($x == 'José'){
       $form_state->setErrorByName('um_texto_qualquer',$this->t('José não vai...'));
     }*/
+    
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     $results = array_filter($form_state->getValue('table'));
 
-    $body = '';
+    $body = '<div><img width="700" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/boletim.png"></div>';
     $nodes = Node::loadMultiple(array_keys($results));
     foreach ($nodes as $node) {
       $body .= "<h1>{$node->title->value}</h1> <br><br>";
     }
 
     $values = [
-      'type' => 'page',
+      'type' => 'simplenews_issue',
       'title' => 'Teste',
       'moderation_state' => 'published',
       'langcode' => 'pt-br',

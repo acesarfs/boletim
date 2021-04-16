@@ -6,3 +6,28 @@ boletim.boletim_controller_index:
     _title: 'index'
   requirements:
     _permission: 'access content'
+
+boletim.boletim_controller_mail:
+  path: '/boletim/send/{node}'
+  defaults:
+    _controller: '\Drupal\boletim\Controller\BoletimController::email'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+boletim.boletim_send_mail:
+  path: '/boletim/{node}/send'
+  defaults:
+    _controller: '\Drupal\boletim\Controller\BoletimController::email'
+    _title_callback: 'Enviar'
+  requirements:
+    _permission: 'access content'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node
+
