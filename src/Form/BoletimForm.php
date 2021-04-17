@@ -7,8 +7,15 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\node\Entity\Node;
+use Drupal\boletim\Utils;
 
 class BoletimForm extends FormBase {
+
+   const bundles = [
+    ['noticias','Destaques','changed','now'],
+    ['eventos','Eventos','field_inicio','now'],
+    ['clipping','FFLCH na mídia','field_data_de_publicacao_clippin','-7 days']
+  ];
 
   public function getFormId() {
     return 'boletim_form';
@@ -16,32 +23,20 @@ class BoletimForm extends FormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    $config = $this->config('boletim.settings');
-
-    $nids = \Drupal::entityQuery('node')->condition('type','page')->execute();
-    $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
-
-    $options = [];
-    foreach ($nodes as $node) {
-      $options[$node->nid->value] =  array('title' => $node->title->value);
-    }
-
-    $form['numero'] = array(
-      '#type' => 'textarea',
-      '#title' => t('Bla'),
-    );
-
-    $form['table'] = array(
-      '#type' => 'tableselect',
-      '#header' => array('title' => t('Título')),
-      '#options' => $options,
-      '#empty' => t('Nenhum conteúdo encontrado!'),
-      '#attributes' => array('id' => 'sortable'),
+    $form['boletim']['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Título'),
+      '#default_value' => 'Boletim Acontece na FFLCH USP nº',
     );
     
+    foreach(self::bundles as $arr){
+      $form['boletim'][] = Utils::getNodes($arr[0],$arr[1],$arr[2],$arr[3]);
+    }
+
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => $this->t('CRIOAR'),
+      '#prefix' => '<br><br>',
+      '#value' => $this->t('Criar boletim'),
     ];
 
     return $form;
@@ -58,17 +53,20 @@ class BoletimForm extends FormBase {
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    $results = array_filter($form_state->getValue('table'));
-
     $body = '<div><img width="700" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/boletim.png"></div>';
-    $nodes = Node::loadMultiple(array_keys($results));
-    foreach ($nodes as $node) {
-      $body .= "<h1>{$node->title->value}</h1> <br><br>";
+
+    foreach(self::bundles as $arr){
+      $body .= "<div><h1>$arr[1]</h1></div>";
+      $nids = array_filter($form_state->getValue($arr[0]));
+      $nodes = Node::loadMultiple(array_keys($nids));
+      foreach ($nodes as $node) {
+        $body .= "<h3>{$node->title->value}</h3><br>";
+      }
     }
 
     $values = [
-      'type' => 'simplenews_issue',
-      'title' => 'Teste',
+      'type' => 'page',
+      'title' => $form_state->getValue('title'),
       'moderation_state' => 'published',
       'langcode' => 'pt-br',
       'body' => [['value' => $body, 'format' => 'full_html']],

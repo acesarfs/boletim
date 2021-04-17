@@ -39,7 +39,8 @@ class BoletimController extends ControllerBase {
 
     $module = 'boletim';
     $key = 'boletim_key';
-    $to = \Drupal::config('system.site')->get('mail');
+    $to = 'fflchsti@usp.br';
+    #$to = \Drupal::config('system.site')->get('mail');
     $params['subject'] = $node->title->value;
     $params['message'] = $node->body->value;
     $langcode = \Drupal::currentUser()->getPreferredLangcode();
