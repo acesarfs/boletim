@@ -14,6 +14,7 @@ class BoletimForm extends FormBase {
    const bundles = [
     ['noticias','Destaques','changed','now'],
     ['eventos','Eventos','field_inicio','now'],
+    ['defesas','Próximas defesas','field_data_horario','now'],
     ['clipping','FFLCH na mídia','field_data_de_publicacao_clippin','-7 days']
   ];
 
@@ -26,7 +27,7 @@ class BoletimForm extends FormBase {
     $form['boletim']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Título'),
-      '#default_value' => 'Boletim Acontece na FFLCH USP nº',
+      '#default_value' => 'Boletim Acontece na FFLCH USP nº ',
     );
     
     foreach(self::bundles as $arr){
@@ -56,16 +57,27 @@ class BoletimForm extends FormBase {
     $body = '<div><img width="700" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/boletim.png"></div>';
 
     foreach(self::bundles as $arr){
-      $body .= "<div><h1>$arr[1]</h1></div>";
+      $body .= "<div><b>$arr[1]</b><hr></div>";
       $nids = array_filter($form_state->getValue($arr[0]));
       $nodes = Node::loadMultiple(array_keys($nids));
       foreach ($nodes as $node) {
-        $body .= "<h3>{$node->title->value}</h3><br>";
+        if($arr[0] == 'noticias') {
+          $uri = $node->field_imagem->entity->getFileUri();
+	  $img_path = file_create_url($uri);
+          $body .= "<img width='400' src='{$img_path}'><br>";
+        }
+
+        $body .= "<a href='{$node->nid->value}'>{$node->title->value}</a><br>";
       }
     }
 
+    $body .= 'Este boletim é produzido pelo Serviço de Comunicação Social da Faculdade de Filosofia, Letras e Ciências Humanas da Universidade de São Paulo.<br>
+Todos os conteúdos podem ser reproduzidos mediante citação dos créditos do Serviço de Comunicação Social da FFLCH USP.<br>
+comunicacaofflch@usp.br | (11) 3091-4612 | 3091-4938<br>
+FFLCH | Faculdade de Filosofia, Letras e Ciências Humanas';
+
     $values = [
-      'type' => 'page',
+      'type' => 'boletim',
       'title' => $form_state->getValue('title'),
       'moderation_state' => 'published',
       'langcode' => 'pt-br',
@@ -80,20 +92,6 @@ class BoletimForm extends FormBase {
     $response = new RedirectResponse($url);
     $response->send();
 
-    #dd($form_state->getValue('nides'));
-    #dd($form_state->getValue('nodes'));
-    #foreach($form_state->getValue('noticias') as $k=>$v){
-    #  dsm($k .'  ' . $v );
-    #}
-    #dd($form_state->getValues());
-
-
-    #dd($form_state->getValue('noticias'));
-
-    /*$this->config('boletim.settings')
-      ->set('um_texto_qualquer', $form_state->getValue('um_texto_qualquer'))
-      ->save();*/
-    #parent::submitForm($form, $form_state);
   }
 
 }
