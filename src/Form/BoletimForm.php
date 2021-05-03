@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\node\Entity\Node;
 use Drupal\boletim\Utils;
+use Drupal\Core\Datetime\DrupalDateTime;
 
 class BoletimForm extends FormBase {
 
@@ -23,11 +24,11 @@ class BoletimForm extends FormBase {
   }
 
   public function buildForm(array $form, FormStateInterface $form_state) {
-
+    $date = new DrupalDateTime();
     $form['boletim']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Título'),
-      '#default_value' => 'Boletim Acontece na FFLCH USP nº ',
+      '#default_value' => 'Boletim Acontece na FFLCH USP nº DATA (' . $date->format('d/m/Y') . ')',
     );
     
     foreach(self::bundles as $arr){
@@ -61,7 +62,7 @@ class BoletimForm extends FormBase {
       $nids = array_filter($form_state->getValue($arr[0]));
       $nodes = Node::loadMultiple(array_keys($nids));
       foreach ($nodes as $node) {
-        if($arr[0] == 'noticias') {
+        if($arr[0] == 'noticias' && !empty($node->get('field_imagem')->getValue())) {
           $uri = $node->field_imagem->entity->getFileUri();
 	  $img_path = file_create_url($uri);
           $body .= "<img width='400' src='{$img_path}'><br>";
@@ -72,9 +73,10 @@ class BoletimForm extends FormBase {
     }
 
     $body .= 'Este boletim é produzido pelo Serviço de Comunicação Social da Faculdade de Filosofia, Letras e Ciências Humanas da Universidade de São Paulo.<br>
-Todos os conteúdos podem ser reproduzidos mediante citação dos créditos do Serviço de Comunicação Social da FFLCH USP.<br>
-comunicacaofflch@usp.br | (11) 3091-4612 | 3091-4938<br>
-FFLCH | Faculdade de Filosofia, Letras e Ciências Humanas';
+Todos os conteúdos podem ser reproduzidos mediante citação dos créditos como:<br> 
+Serviço de Comunicação Social da FFLCH-USP.<br><br>
+comunicacaofflch@usp.br | (11) 3091-4612
+<p><a href="https://www.facebook.com/fflch"><img alt="FACEBOOK DA FFLCH" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Facebook.png" width="34" /></a> <a href="https://www.youtube.com/c/uspfflch1"><img alt="Youtube da FFLCH" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Youtube.jpg" width="34" /></a> <a href="https://twitter.com/uspfflch"><img alt="Twitter da FFLCH" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Twitter.png" width="34" /></a> <a href="https://www.instagram.com/uspfflch/"><img alt="Instagram" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Instagram.jpg" width="34" /></a></p>';
 
     $values = [
       'type' => 'boletim',
