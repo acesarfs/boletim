@@ -39,13 +39,21 @@ class Utils{
     $aux = [];
     foreach ($nodes as $node) {
       if($after_field == 'changed') {
-        $aux[$node->nid->value] =  array('title' => $node->title->value);
+        $date = DrupalDateTime::createFromTimestamp($node->changed->value);
+        $aux[$node->nid->value] =  array('title' => $node->title->value, 'changed' => $date->format('d/m/Y'));
       } else {
         $Ymd = substr($node->{$after_field}->value,0,10);
         $date = implode('/',array_reverse(explode('-',$Ymd)));
-        $aux[$node->nid->value] =  array('title' => $node->title->value . ' - ' . $date);
+        $aux[$node->nid->value] =  array('title' => $node->title->value, $after_field => $date);
        }
     }
+
+    $header_fields = [
+	'changed' => 'Publicado',
+	'field_inicio' => 'Início',
+	'field_data_horario' => 'Date',
+	'field_data_de_publicacao_clippin' => 'Publicado',
+    ];
 
     $form = [];
 
@@ -55,7 +63,7 @@ class Utils{
 
     $form[$bundle] = [
       '#type' => 'tableselect',
-      '#header' => array('title' => t('Título')),
+      '#header' => array('title' => t('Título'), $after_field => t($header_fields[$after_field])),
       '#options' => $aux,
       '#empty' => t('Nenhum conteúdo encontrado!'),
       '#attributes' => array('id' => 'sortable'),

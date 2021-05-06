@@ -68,7 +68,7 @@ class BoletimForm extends FormBase {
           $body .= "<img width='400' src='{$img_path}'><br>";
         }
 
-        $body .= "<a href='{$node->nid->value}'>{$node->title->value}</a><br>";
+        $body .= "<a href='{$node->nid->value}'>{$node->title->value}</a><br><br>";
       }
     }
 
