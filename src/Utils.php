@@ -10,49 +10,60 @@ class Utils{
 
   public static function getNodes($bundle, $title ,$after_field = 'changed', $from = 'now', $to = '+14 days'){
 
-    if($after_field == 'changed') {
-      $nids = \Drupal::entityQuery('node')
-             ->condition('type',$bundle)
-             ->condition($after_field, strtotime('-8 days'), '>=')
-             ->execute();
-    } else {
-      $timezone = drupal_get_user_timezone();
-      $start = new \DateTime($from, new \DateTimeZone($timezone));
-      $start->setTime(0,0);
-      $start->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
-      $start = DrupalDateTime::createFromDateTime($start);
+    $timezone = drupal_get_user_timezone();
+    $start = new \DateTime($from, new \DateTimeZone($timezone));
+    $start->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+    $start->setTime(21,0);
+    $start = DrupalDateTime::createFromDateTime($start);
+    $end = new \DateTime($to, new \DateTimeZone($timezone));
+    $end->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+    $end->setTime(23, 59);
+    $end = DrupalDateTime::createFromDateTime($end);
 
-      $end = new \DateTime($to, new \DateTimezone($timezone));
-      $end->setTime(23, 0);
-      $end->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
-      $end = DrupalDateTime::createFromDateTime($end);
-
-      $nids = \Drupal::entityQuery('node')
-             ->condition('type',$bundle)
-             ->condition($after_field, $start->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT), '>=')
-             ->condition($after_field, $end->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT), '<=')
-             ->execute();
+    if ($after_field == 'field_data_de_publicacao') {
+        $start = $start->format('Y-m-d');
+        $end = $end->format('Y-m-d');
     }
+    elseif ($after_field == 'changed') {
+        $start = strtotime($start);
+        $end = strtotime($end);
+    }
+    else {
+        $start = $start->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+        $end = $end->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+    }
+    $nids = \Drupal::entityQuery('node')
+           ->condition('type',$bundle)
+           ->condition($after_field, $start, '>=')
+           ->condition($after_field, $end, '<=')
+           ->execute();
     
     $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
 
     $aux = [];
     foreach ($nodes as $node) {
-      if($after_field == 'changed') {
+      if($after_field == 'field_data_de_publicacao') {
+        $date = DrupalDateTime::createFromTimestamp($node->changed->value);
+        $aux[$node->nid->value] =  array('title' => $node->title->value, 'field_data_de_publicacao' => $date->format('d/m/Y'));
+      }
+      elseif($after_field == 'changed') {
         $date = DrupalDateTime::createFromTimestamp($node->changed->value);
         $aux[$node->nid->value] =  array('title' => $node->title->value, 'changed' => $date->format('d/m/Y'));
-      } else {
-        $Ymd = substr($node->{$after_field}->value,0,10);
-        $date = implode('/',array_reverse(explode('-',$Ymd)));
-        $aux[$node->nid->value] =  array('title' => $node->title->value, $after_field => $date);
+      }
+      else {
+        $data = $node->{$after_field}->value;
+        $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+        $data->setTimezone(new \DateTimeZone($timezone));
+        $data = $data->format('d/m/Y');
+        $aux[$node->nid->value] =  array('title' => $node->title->value, $after_field => $data);
        }
     }
 
     $header_fields = [
-	'changed' => 'Publicado',
+	'field_data_de_publicacao' => 'Publicação',
 	'field_inicio' => 'Início',
 	'field_data_horario' => 'Date',
-	'field_data_de_publicacao_clippin' => 'Publicado',
+	'changed' => 'Alteração',
     ];
 
     $form = [];
@@ -71,5 +82,5 @@ class Utils{
     return $form;
 
   }
-}
 
+}
