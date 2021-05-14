@@ -43,8 +43,9 @@ class Utils{
     $aux = [];
     foreach ($nodes as $node) {
       if($after_field == 'field_data_de_publicacao') {
-        $date = DrupalDateTime::createFromTimestamp($node->changed->value);
-        $aux[$node->nid->value] =  array('title' => $node->title->value, 'field_data_de_publicacao' => $date->format('d/m/Y'));
+        $data = $node->field_data_de_publicacao->value;
+        $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+        $aux[$node->nid->value] =  array('title' => $node->title->value, 'field_data_de_publicacao' => $data->format('d/m/Y'));
       }
       elseif($after_field == 'changed') {
         $date = DrupalDateTime::createFromTimestamp($node->changed->value);

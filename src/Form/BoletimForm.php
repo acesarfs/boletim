@@ -80,17 +80,18 @@ class BoletimForm extends FormBase {
         }
         if($arr[0] == 'clipping'){
           $date = DrupalDateTime::createFromTimestamp($node->changed->value);
+          $date = $date->format('d/m');
 	  $artigo_uri = "<a href='{$node->field_link_da_materia_artigo->uri}'>{$node->title->value}</a>";
           $veiculo = $node->field_nome_do_veiculo->value;
-          $body .= "<span>" . $date->format('d/m') . "</span><br>" . $artigo_uri . " (" . $veiculo . ")<br>";          
-          $body .= "<span>" . $node->field_resumo->value . "<span></br>";
+          $resumo = $node->field_resumo->value;
+          $body .= "$date<br>$artigo_uri ( $veiculo )<br>$resumo<br>";
         }
 	if($arr[0] == 'eventos'){
           $field_inicio = $node->field_inicio->value;
           $field_inicio = new DrupalDateTime($field_inicio, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
           $field_inicio->setTimezone(new \DateTimeZone($timezone));
           $field_inicio = $field_inicio->format('d/m/Y \- H:i');
-          $body .= $link . "<span>" . $field_inicio . "</span><br>";
+          $body .= "$link$field_inicio<br>";
           if ($node->field_inscricao->value == 'cominscricao') {
             $field_inicio_inscricao = $node->field_inicio_inscricao->value;
             $field_inicio_inscricao = new DrupalDateTime($field_inicio_inscricao, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
@@ -98,11 +99,11 @@ class BoletimForm extends FormBase {
             $field_fim_inscricao = $node->field_fim_inscricao->value;
             $field_fim_inscricao = new DrupalDateTime($field_fim_inscricao, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
             $field_fim_inscricao = $field_fim_inscricao->format('d/m/Y');
-            $body .= "<span>Inscrições: $field_inicio_inscricao - $field_fim_inscricao</span><br>";
+            $body .= "Inscrições: $field_inicio_inscricao - $field_fim_inscricao<br>";
           }
         }
         if($arr[0] == 'defesas'){
-          $body .= $link . "<span>Programa: " . $node->field_programa->value . "</span><br>";
+          $body .= $link . "Programa: " . $node->field_programa->value . "<br>";
         }
         $body .= "<br>";
       }
