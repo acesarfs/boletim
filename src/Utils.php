@@ -84,4 +84,18 @@ class Utils{
 
   }
 
+  public static function getNumeroBoletim(){
+    $query = \Drupal::entityQuery('node')
+           ->condition('type','boletim')
+           ->range(0,1)
+           ->sort('created', 'DESC')
+           ->execute();
+
+    $boletins = \Drupal\node\Entity\Node::loadMultiple($query);
+    foreach($boletins as $boletim){
+        $numero = $boletim->field_numero->value ? (int)$boletim->field_numero->value + 1 : 0;
+    }
+    return $numero;
+  }
+
 }

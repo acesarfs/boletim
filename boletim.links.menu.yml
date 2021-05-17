@@ -1,0 +1,5 @@
+boletim.form:
+  title: Boletim FFLCH
+  description: 'Boletim'
+  parent: system.admin_config_system
+  route_name: boletim.settings

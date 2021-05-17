@@ -13,7 +13,9 @@ use \Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 class BoletimForm extends FormBase {
 
-   const bundles = [
+  private $numero;
+
+  const bundles = [
     ['noticias','Destaques','field_data_de_publicacao','last week saturday','now'],
     ['eventos','Eventos','field_inicio','now', 'Friday next week'],
     ['defesas','Próximas defesas','field_data_horario','now','Friday next week'],
@@ -26,10 +28,11 @@ class BoletimForm extends FormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state) {
     $date = new DrupalDateTime();
+    $this->numero = Utils::getNumeroBoletim();    
     $form['boletim']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Título'),
-      '#default_value' => 'Boletim Acontece na FFLCH USP nº DATA (' . $date->format('d/m/Y') . ')',
+      '#default_value' => 'Boletim Acontece na FFLCH USP nº ' . $this->numero . ' DATA (' . $date->format('d/m/Y') . ')',
     );
     
     foreach(self::bundles as $arr){
@@ -57,7 +60,8 @@ class BoletimForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     $timezone = drupal_get_user_timezone();
-    $body = '<div><img width="700" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/boletim.png"></div>';
+    $config = \Drupal::config('boletim.settings');
+    $body = $config->get('header.value');
 
     foreach(self::bundles as $arr){
       $body .= "<div><b>$arr[1]</b><hr></div>";
@@ -103,18 +107,19 @@ class BoletimForm extends FormBase {
           }
         }
         if($arr[0] == 'defesas'){
-          $body .= $link . "Programa: " . $node->field_programa->value . "<br>";
+
+          $data_horario = $node->field_data_horario->value;
+          $data_horario = new DrupalDateTime($data_horario, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+          $data_horario->setTimezone(new \DateTimeZone($timezone));
+          $data_horario = $data_horario->format('d/m/Y \- H:i');
+          $body .=  $data_horario . "<br>" . $link . "Programa: " . $node->field_programa->value . "<br>";
         }
         $body .= "<br>";
       }
 
     }
 
-    $body .= '<hr>Este boletim é produzido pelo Serviço de Comunicação Social da Faculdade de Filosofia, Letras e Ciências Humanas da Universidade de São Paulo.<br>
-Todos os conteúdos podem ser reproduzidos mediante citação dos créditos como:<br> 
-Serviço de Comunicação Social da FFLCH-USP.<br><br>
-comunicacaofflch@usp.br | (11) 3091-4612
-<p><a href="https://www.facebook.com/fflch"><img alt="FACEBOOK DA FFLCH" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Facebook.png" width="34" /></a> <a href="https://www.youtube.com/c/uspfflch1"><img alt="Youtube da FFLCH" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Youtube.jpg" width="34" /></a> <a href="https://twitter.com/uspfflch"><img alt="Twitter da FFLCH" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Twitter.png" width="34" /></a> <a href="https://www.instagram.com/uspfflch/"><img alt="Instagram" height="34" src="https://www.fflch.usp.br/sites/fflch.usp.br/files/inline-images/Instagram.jpg" width="34" /></a></p>';
+    $body .= $config->get('footer.value');
 
     $values = [
       'type' => 'boletim',
@@ -122,6 +127,7 @@ comunicacaofflch@usp.br | (11) 3091-4612
       'moderation_state' => 'published',
       'langcode' => 'pt-br',
       'body' => [['value' => $body, 'format' => 'full_html']],
+      'field_numero' => $this->numero,
       'uid' => \Drupal::currentUser()->id(),
     ];
 

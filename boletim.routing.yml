@@ -19,3 +19,11 @@ boletim.boletim_send_mail:
       node:
         type: entity:node
 
+boletim.settings:
+  path: '/admin/config/boletim'
+  defaults:
+    _form: '\Drupal\boletim\Form\BoletimConfigForm'
+    _title: 'Boletim FFLCH'
+  requirements:
+    _permission: 'administer software updates'
+
