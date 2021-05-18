@@ -7,5 +7,7 @@
             "email": "verissimotgv@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "drupal/jquery_ui_sortable": "^1.1",
+    }
 }
