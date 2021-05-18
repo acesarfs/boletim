@@ -9,5 +9,5 @@
     ],
     "require": {
         "drupal/jquery_ui_sortable": "^1.1",
-    }
+    },
 }
