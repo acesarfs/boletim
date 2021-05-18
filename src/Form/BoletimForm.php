@@ -32,7 +32,7 @@ class BoletimForm extends FormBase {
     $form['boletim']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Título'),
-      '#default_value' => 'Boletim Acontece na FFLCH USP nº ' . $this->numero . ' DATA (' . $date->format('d/m/Y') . ')',
+      '#default_value' => 'Boletim Acontece na FFLCH USP nº ' . $this->numero . ' (' . $date->format('d/m/Y') . ')',
     );
     
     foreach(self::bundles as $arr){
