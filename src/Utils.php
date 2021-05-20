@@ -20,9 +20,13 @@ class Utils{
     $end->setTime(23, 59);
     $end = DrupalDateTime::createFromDateTime($end);
 
+    $query = \Drupal::entityQuery('node')
+             ->condition('type',$bundle);
+
     if ($after_field == 'field_data_de_publicacao') {
         $start = $start->format('Y-m-d');
         $end = $end->format('Y-m-d');
+        $query->condition('status', 1);
     }
     elseif ($after_field == 'changed') {
         $start = strtotime($start);
@@ -32,39 +36,58 @@ class Utils{
         $start = $start->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
         $end = $end->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
     }
-    $nids = \Drupal::entityQuery('node')
-           ->condition('type',$bundle)
-           ->condition($after_field, $start, '>=')
-           ->condition($after_field, $end, '<=')
-           ->execute();
+
+    $query->condition($after_field, $start, '>=');
+    $query->condition($after_field, $end, '<=');
+    $nids = $query->execute();
+
+#    $nids = \Drupal::entityQuery('node')
+#           ->condition('type',$bundle)
+#           ->condition($after_field, $start, '>=')
+#           ->condition($after_field, $end, '<=')
+#           ->execute();
     
     $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
 
     $aux = [];
     foreach ($nodes as $node) {
+      $updated = DrupalDateTime::createFromTimestamp($node->changed->value);
       if($after_field == 'field_data_de_publicacao') {
         $data = $node->field_data_de_publicacao->value;
         $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
-        $aux[$node->nid->value] =  array('title' => $node->title->value, 'field_data_de_publicacao' => $data->format('d/m/Y'));
+        $aux[$node->nid->value] = [
+           'title' => $node->title->value, 
+           'field_data_de_publicacao' => $data->format('d/m/Y'),
+           'Atualizado' => $updated->format('d/m/Y'),
+        ];
       }
       elseif($after_field == 'changed') {
-        $date = DrupalDateTime::createFromTimestamp($node->changed->value);
-        $aux[$node->nid->value] =  array('title' => $node->title->value, 'changed' => $date->format('d/m/Y'));
+        $data = $node->field_data_de_publicacao_clippin->value;
+        $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+        $aux[$node->nid->value] = [
+           'title' => $node->title->value, 
+           'changed' => $data->format('d/m/Y'),
+           'Atualizado' => $updated->format('d/m/Y'),
+	];
       }
       else {
         $data = $node->{$after_field}->value;
         $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
         $data->setTimezone(new \DateTimeZone($timezone));
-        $data = $data->format('d/m/Y');
-        $aux[$node->nid->value] =  array('title' => $node->title->value, $after_field => $data);
+        #$data = $data->format('d/m/Y');
+        $aux[$node->nid->value] =  [
+           'title' => $node->title->value,
+           $after_field => $data->format('d/m/Y'),
+           'Atualizado' => $updated->format('d/m/Y'),
+        ];
        }
     }
 
     $header_fields = [
-	'field_data_de_publicacao' => 'Publicação',
+	'field_data_de_publicacao' => 'Data de Publicação',
 	'field_inicio' => 'Início',
 	'field_data_horario' => 'Date',
-	'changed' => 'Alteração',
+	'changed' => 'Data de Publicação no Veículo',
     ];
 
     $form = [];
@@ -75,7 +98,11 @@ class Utils{
 
     $form[$bundle] = [
       '#type' => 'tableselect',
-      '#header' => array('title' => t('Título'), $after_field => t($header_fields[$after_field])),
+      '#header' => [
+	  'title' => t('Título'),
+          $after_field => t($header_fields[$after_field]),
+          'Atualizado' => t('Atualizado'),
+      ], 
       '#options' => $aux,
       '#empty' => t('Nenhum conteúdo encontrado!'),
       '#attributes' => array('id' => 'sortable'),
@@ -96,6 +123,11 @@ class Utils{
         $numero = $boletim->field_numero->value ? (int)$boletim->field_numero->value + 1 : 0;
     }
     return $numero;
+  }
+
+  public static function removeTags($string){
+    $string = str_replace(["\r", "\n"], "", $string);
+    return strip_tags($string);
   }
 
 }

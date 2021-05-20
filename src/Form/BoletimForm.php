@@ -83,12 +83,13 @@ class BoletimForm extends FormBase {
           $body .= "$link<br>$linha_fina<br>";
         }
         if($arr[0] == 'clipping'){
-          $date = DrupalDateTime::createFromTimestamp($node->changed->value);
-          $date = $date->format('d/m');
+          $data = $node->field_data_de_publicacao_clippin->value;
+          $date = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
+          $date = $date->format('d/m/Y');
 	  $artigo_uri = "<a href='{$node->field_link_da_materia_artigo->uri}'>{$node->title->value}</a>";
           $veiculo = $node->field_nome_do_veiculo->value;
-          $resumo = $node->field_resumo->value;
-          $body .= "$date<br>$artigo_uri ( $veiculo )<br>$resumo<br>";
+          $resumo = Utils::removeTags($node->field_resumo->value);
+          $body .= "$date<br>$artigo_uri ($veiculo)<br>$resumo<br>";
         }
 	if($arr[0] == 'eventos'){
           $field_inicio = $node->field_inicio->value;
