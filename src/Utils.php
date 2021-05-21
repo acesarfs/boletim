@@ -31,7 +31,14 @@ class Utils{
     elseif ($after_field == 'changed') {
         $start = strtotime($start);
         $end = strtotime($end);
+        $query->sort('field_data_de_publicacao_clippin', 'ASC');
     }
+    elseif ($after_field == 'field_data_horario') {
+        $start = $start->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+        $end = $end->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+        $query->sort('field_data_horario', 'ASC');
+    }
+
     else {
         $start = $start->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
         $end = $end->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
@@ -40,12 +47,6 @@ class Utils{
     $query->condition($after_field, $start, '>=');
     $query->condition($after_field, $end, '<=');
     $nids = $query->execute();
-
-#    $nids = \Drupal::entityQuery('node')
-#           ->condition('type',$bundle)
-#           ->condition($after_field, $start, '>=')
-#           ->condition($after_field, $end, '<=')
-#           ->execute();
     
     $nodes = \Drupal\node\Entity\Node::loadMultiple($nids);
 
@@ -53,6 +54,7 @@ class Utils{
     foreach ($nodes as $node) {
       $updated = DrupalDateTime::createFromTimestamp($node->changed->value);
       if($after_field == 'field_data_de_publicacao') {
+#dd($node);
         $data = $node->field_data_de_publicacao->value;
         $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
         $aux[$node->nid->value] = [

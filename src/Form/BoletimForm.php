@@ -32,7 +32,7 @@ class BoletimForm extends FormBase {
     $form['boletim']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Título'),
-      '#default_value' => 'Boletim Acontece na FFLCH USP nº ' . $this->numero . ' (' . $date->format('d/m/Y') . ')',
+      '#default_value' => 'Boletim Acontece na FFLCH USP nº ' . $this->numero . ' - ' . $date->format('d/m/Y'),
     );
     
     foreach(self::bundles as $arr){
@@ -62,6 +62,7 @@ class BoletimForm extends FormBase {
     $timezone = drupal_get_user_timezone();
     $config = \Drupal::config('boletim.settings');
     $body = $config->get('header.value');
+    $old_date = null;
 
     foreach(self::bundles as $arr){
       $body .= "<div><b>$arr[1]</b><hr></div>";
@@ -79,8 +80,10 @@ class BoletimForm extends FormBase {
 	    $img_path = file_create_url($uri);
             $body .= "<img width='400' src='{$img_path}'><br>";
           }
-          $linha_fina = $node->field_linha_fina->value;
-          $body .= "$link<br>$linha_fina<br>";
+          $body .= $link;
+          if($node->field_linha_fina->value) {          
+             $body .= Utils::removeTags($node->field_linha_fina->value) . "<br>";
+          }
         }
         if($arr[0] == 'clipping'){
           $data = $node->field_data_de_publicacao_clippin->value;
@@ -89,7 +92,11 @@ class BoletimForm extends FormBase {
 	  $artigo_uri = "<a href='{$node->field_link_da_materia_artigo->uri}'>{$node->title->value}</a>";
           $veiculo = $node->field_nome_do_veiculo->value;
           $resumo = Utils::removeTags($node->field_resumo->value);
-          $body .= "$date<br>$artigo_uri ($veiculo)<br>$resumo<br>";
+          if(is_null($old_date) || $old_date != $date) {
+             $body .= "$date<br>";
+             $old_date = $date;  
+          }
+          $body .= "$artigo_uri ($veiculo)<br><br>$resumo<br>";
         }
 	if($arr[0] == 'eventos'){
           $field_inicio = $node->field_inicio->value;
@@ -108,12 +115,17 @@ class BoletimForm extends FormBase {
           }
         }
         if($arr[0] == 'defesas'){
-
           $data_horario = $node->field_data_horario->value;
           $data_horario = new DrupalDateTime($data_horario, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
           $data_horario->setTimezone(new \DateTimeZone($timezone));
-          $data_horario = $data_horario->format('d/m/Y \- H:i');
-          $body .=  $data_horario . "<br>" . $link . "Programa: " . $node->field_programa->value . "<br>";
+          #$data = $data_horario->format('d/m/Y \- H:i');
+          $date = $data_horario->format('d/m/Y');
+          $hora = $data_horario->format('H:i');
+          if(is_null($old_date) || $old_date != $date) {
+             $body .= "$date<br>";
+             $old_date = $date;  
+          }
+          $body .=  $hora . "<br>" . $link . "Programa: " . $node->field_programa->value . "<br>";
         }
         $body .= "<br>";
       }
