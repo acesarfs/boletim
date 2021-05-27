@@ -35,17 +35,17 @@ class BoletimController extends ControllerBase {
 
   public function email($node) {
 
-    $tos = ['eventosdf_fflch@listas.usp.br','fflch@listas.usp.br'];
+    $tos = ['fflch@listas.usp.br' , 'eventosdf_fflch@listas.usp.br'];
 
     foreach($tos as $to) {
       $mailManager = \Drupal::service('plugin.manager.mail');
       $module = 'boletim';
       $key = 'boletim_key';
-      #$params['from'] = 'comunicacaofflch@usp.br';
+      $params['from_name'] = 'Comunicação FFLCH USP';
+      $params['from_mail'] = 'comunicacaofflch@usp.br';
       $params['subject'] = $node->title->value;
       $params['message'] = $node->body->value;
       $langcode = \Drupal::currentUser()->getPreferredLangcode();
-      $reply = \Drupal::config('system.site')->get('mail');
       $send = true;
 
       $result = $mailManager->mail($module, $key, $to, $langcode, $params, $reply , $send);
@@ -65,7 +65,6 @@ class BoletimController extends ControllerBase {
       $response->send();
     }  
   }
+
 }
-
-
 

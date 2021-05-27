@@ -65,7 +65,7 @@ class BoletimForm extends FormBase {
     $old_date = null;
 
     foreach(self::bundles as $arr){
-      $body .= "<div><b>$arr[1]</b><hr></div>";
+      $body .= "<b>$arr[1]</b><hr>";
       $nids = array_filter($form_state->getValue($arr[0]));
       $nodes = Node::loadMultiple(array_keys($nids));
       foreach ($nodes as $node) {
@@ -96,7 +96,7 @@ class BoletimForm extends FormBase {
              $body .= "$date<br>";
              $old_date = $date;  
           }
-          $body .= "$artigo_uri ($veiculo)<br><br>$resumo<br>";
+          $body .= "$artigo_uri ($veiculo)<br>$resumo<br>";
         }
 	if($arr[0] == 'eventos'){
           $field_inicio = $node->field_inicio->value;

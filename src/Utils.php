@@ -54,7 +54,6 @@ class Utils{
     foreach ($nodes as $node) {
       $updated = DrupalDateTime::createFromTimestamp($node->changed->value);
       if($after_field == 'field_data_de_publicacao') {
-#dd($node);
         $data = $node->field_data_de_publicacao->value;
         $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
         $aux[$node->nid->value] = [
@@ -122,7 +121,7 @@ class Utils{
 
     $boletins = \Drupal\node\Entity\Node::loadMultiple($query);
     foreach($boletins as $boletim){
-        $numero = $boletim->field_numero->value ? (int)$boletim->field_numero->value + 1 : 0;
+        $numero = $boletim->field_numero->value ? (int)$boletim->field_numero->value + 1 : 1;
     }
     return $numero;
   }
