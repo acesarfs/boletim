@@ -19,6 +19,7 @@ class Utils{
     $end->setTimezone(new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
     $end->setTime(23, 59);
     $end = DrupalDateTime::createFromDateTime($end);
+    $attributes = array('id' => 'notsortable');
 
     $query = \Drupal::entityQuery('node')
              ->condition('type',$bundle);
@@ -27,11 +28,13 @@ class Utils{
         $start = $start->format('Y-m-d');
         $end = $end->format('Y-m-d');
         $query->condition('status', 1);
+        $attributes['id'] = 'sortable';
     }
     elseif ($after_field == 'changed') {
         $start = strtotime($start);
         $end = strtotime($end);
         $query->sort('field_data_de_publicacao_clippin', 'ASC');
+        $attributes['id'] = 'sortable';
     }
     elseif ($after_field == 'field_data_horario') {
         $start = $start->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
@@ -106,7 +109,7 @@ class Utils{
       ], 
       '#options' => $aux,
       '#empty' => t('Nenhum conteúdo encontrado!'),
-      '#attributes' => array('id' => 'sortable'),
+      '#attributes' => $attributes,
     ];
     return $form;
 
