@@ -33,6 +33,7 @@ class Utils{
     elseif ($after_field == 'changed') {
         $start = strtotime($start);
         $end = strtotime($end);
+        $query->condition('field_publicar_no_fflch_na_midia', 1);
         $query->sort('field_data_de_publicacao_clippin', 'ASC');
         $attributes['id'] = 'sortable';
     }
