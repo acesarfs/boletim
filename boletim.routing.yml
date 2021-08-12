@@ -6,10 +6,32 @@ boletim.boletim_controller_index:
   requirements:
     _permission: 'administer software updates'
     
-boletim.boletim_send_mail:
-  path: '/boletim/{node}/send'
+boletim.boletim_send_teste_mail:
+  path: '/boletim/{node}/mailtest'
   defaults:
-    _controller: '\Drupal\boletim\Controller\BoletimController::email'
+    _form: '\Drupal\boletim\Form\BoletimEmailTesteForm'
+    _title: 'Enviar Teste' 
+  requirements:
+    _permission: 'administer software updates'
+    node: \d+
+  options:
+    _node_operation_route: TRUE
+
+boletim.boletim_send_newsletter_mail:
+  path: '/boletim/{node}/mailnewsletter'
+  defaults:
+    _form: '\Drupal\boletim\Form\BoletimEmailNewsLetterForm'
+    _title: 'Enviar Newsletter' 
+  requirements:
+    _permission: 'administer software updates'
+    node: \d+
+  options:
+    _node_operation_route: TRUE
+
+boletim.boletim_send_mail:
+  path: '/boletim/{node}/send/{email}'
+  defaults:
+    _controller: '\Drupal\boletim\Controller\BoletimController::send'
     _title_callback: 'Enviar'
   requirements:
     _permission: 'administer software updates'
@@ -26,4 +48,3 @@ boletim.settings:
     _title: 'Boletim FFLCH'
   requirements:
     _permission: 'administer software updates'
-

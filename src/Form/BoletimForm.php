@@ -118,7 +118,6 @@ class BoletimForm extends FormBase {
           $data_horario = $node->field_data_horario->value;
           $data_horario = new DrupalDateTime($data_horario, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
           $data_horario->setTimezone(new \DateTimeZone($timezone));
-          #$data = $data_horario->format('d/m/Y \- H:i');
           $date = $data_horario->format('d/m/Y');
           $hora = $data_horario->format('H:i');
           if(is_null($old_date) || $old_date != $date) {

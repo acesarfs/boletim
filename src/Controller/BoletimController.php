@@ -11,6 +11,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
 
 class BoletimController extends ControllerBase {
 
@@ -33,21 +34,21 @@ class BoletimController extends ControllerBase {
 
   }
 
-  public function email($node) {
+  public function send(NodeInterface $node, String $email) {
 
-    $tos = ['fflch@listas.usp.br' , 'eventosdf_fflch@listas.usp.br'];
+    $tos = explode(",", $email);
+    $mailManager = \Drupal::service('plugin.manager.mail');
+    $module = 'boletim';
+    $key = 'boletim_key';
+    $params['from_name'] = 'Comunicação FFLCH USP';
+    $params['from_mail'] = 'comunicacaofflch@usp.br';
+    $params['subject'] = $node->title->value;
+    $params['message'] = $node->body->value;
+    $langcode = \Drupal::currentUser()->getPreferredLangcode();
+    $send = true;
 
     foreach($tos as $to) {
-      $mailManager = \Drupal::service('plugin.manager.mail');
-      $module = 'boletim';
-      $key = 'boletim_key';
-      $params['from_name'] = 'Comunicação FFLCH USP';
-      $params['from_mail'] = 'comunicacaofflch@usp.br';
-      $params['subject'] = $node->title->value;
-      $params['message'] = $node->body->value;
-      $langcode = \Drupal::currentUser()->getPreferredLangcode();
-      $send = true;
-
+      $to = trim($to);
       $result = $mailManager->mail($module, $key, $to, $langcode, $params, $reply , $send);
     
       if ($result['result'] != true) {
@@ -60,10 +61,10 @@ class BoletimController extends ControllerBase {
         \Drupal::logger('boletim')->notice($message);
       }
   
+    }  
       $url = Url::fromRoute('entity.node.edit_form', ['node' => $node->nid->value])->toString();
       $response = new RedirectResponse($url);
       $response->send();
-    }  
   }
 
 }

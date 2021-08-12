@@ -48,6 +48,22 @@ class BoletimConfigForm extends ConfigFormBase {
       '#rows' => 10,
       '#default_value' => $config->get('footer.value'),
     ];
+    $form['boletim']['emailnewsletter'] = [
+      '#type' => 'webform_email_multiple',
+      '#title' => $this->t('E-mail para Newsletter'),
+      '#required' => TRUE,
+      '#size' => 100,
+      '#description' => $this->t('Múltiplos emails devem ser separados por vírgula.'),
+      '#default_value' => $config->get('emailnewsletter'),
+    ];
+    $form['boletim']['emailteste'] = [
+      '#type' => 'webform_email_multiple',
+      '#title' => $this->t('E-mail para Teste'),
+      '#required' => TRUE,
+      '#size' => 100,
+      '#description' => $this->t('Múltiplos emails devem ser separados por vírgula.'),
+      '#default_value' => $config->get('emailteste'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -56,10 +72,12 @@ class BoletimConfigForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
-    $this->config('boletim.settings')
-      ->set('header', $values['header'])
-      ->set('footer', $values['footer'])
-      ->save();
+    $config = $this->config('boletim.settings');
+    $config->set('header', $values['header']);
+    $config->set('footer', $values['footer']);
+    $config->set('emailnewsletter', $values['emailnewsletter']);
+    $config->set('emailteste', $values['emailteste']);
+    $config->save();
     parent::submitForm($form, $form_state);
   }
 

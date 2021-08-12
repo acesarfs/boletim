@@ -73,13 +73,13 @@ class Utils{
            'title' => $node->title->value, 
            'changed' => $data->format('d/m/Y'),
            'Atualizado' => $updated->format('d/m/Y'),
+           'Veiculo' => $node->field_nome_do_veiculo->value,
 	];
       }
       else {
         $data = $node->{$after_field}->value;
         $data = new DrupalDateTime($data, new \DateTimeZone(DateTimeItemInterface::STORAGE_TIMEZONE));
         $data->setTimezone(new \DateTimeZone($timezone));
-        #$data = $data->format('d/m/Y');
         $aux[$node->nid->value] =  [
            'title' => $node->title->value,
            $after_field => $data->format('d/m/Y'),
@@ -101,13 +101,19 @@ class Utils{
       '#markup' => "<br><div><h2>{$title}</h2></div>",
     ];
 
+    $header = [
+      'title' => t('Título'),
+      $after_field => t($header_fields[$after_field]),
+      'Atualizado' => t('Atualizado'),
+    ]; 
+
+    if($after_field == 'changed') {
+      $header['Veiculo'] = t('Veículo');
+    }
+
     $form[$bundle] = [
       '#type' => 'tableselect',
-      '#header' => [
-	  'title' => t('Título'),
-          $after_field => t($header_fields[$after_field]),
-          'Atualizado' => t('Atualizado'),
-      ], 
+      '#header' => $header, 
       '#options' => $aux,
       '#empty' => t('Nenhum conteúdo encontrado!'),
       '#attributes' => $attributes,
