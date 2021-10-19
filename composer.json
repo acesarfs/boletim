@@ -1,6 +1,8 @@
 {
     "name": "fflch/boletim",
     "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "description": "Custom module for Boletim FFLCH",
     "authors": [
         {
             "name": "Thiago Gomes Verissimo",
@@ -9,5 +11,6 @@
     ],
     "require": {
         "drupal/jquery_ui_sortable": "^1.1"
-    }
+    },
+    "minimum-stability": "dev"
 }
